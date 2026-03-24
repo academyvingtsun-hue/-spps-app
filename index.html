@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Steigerwald Performance Power System</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9961A;
+    --gold-light: #F0B429;
+    --gold-bright: #FFD166;
+    --black: #0A0A0A;
+    --dark: #111111;
+    --dark-2: #1A1A1A;
+    --steel: #2A2A2A;
+    --steel-light: #3A3A3A;
+    --text: #E8E8E8;
+    --text-dim: #777777;
+    --complete: #4CAF50;
+    --progress: #F0B429;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--steel);
+    flex-shrink: 0;
+  }
+
+  .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .brand span {
+    display: block;
+    font-family: 'Barlow', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    font-weight: 400;
+    margin-top: 3px;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .header-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold-bright);
+    line-height: 1;
+  }
+
+  .header-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar { height: 2px; background: var(--steel); flex-shrink: 0; display: none; }
+  .progress-bar.visible { display: block; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; flex: 1; flex-direction: column; overflow-y: auto; }
+  .page.active { display: flex; }
+
+  /* ── LOADING ── */
+  .loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--steel);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* ══════════════════════════════════════════
+     MORNING PAGE
+  ══════════════════════════════════════════ */
+  .morning-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 36px 24px 32px;
+    gap: 36px;
+  }
+
+  .goal-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .goal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+
+  .action-block {
+    padding: 14px 16px;
+    background: var(--dark-2);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    margin-bottom: 10px;
+  }
+
+  .action-type {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .action-text { font-size: 15px; color: var(--text); line-height: 1.4; }
+
+  .action-block.floor { border-left-color: var(--steel-light); opacity: 0.65; }
+  .action-block.floor .action-type { color: var(--text-dim); }
+
+  .window-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .window-tag strong {
+    color: var(--gold-light);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--steel), transparent); }
+
+  .buttons-prompt {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .three-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .exec-btn {
+    border-radius: 4px;
+    padding: 22px 8px 18px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.12s ease, opacity 0.12s;
+    background: var(--dark-2);
+    border: 1px solid var(--steel);
+    -webkit-appearance: none;
+  }
+
+  .exec-btn:active { transform: scale(0.95); }
+  .btn-complete { border-color: rgba(76,175,80,0.35); }
+  .btn-progress { border-color: rgba(240,180,41,0.35); }
+  .btn-notyet  { border-color: var(--steel); }
+  .exec-btn.selected-complete { background: rgba(76,175,80,0.15); border-color: #4CAF50; }
+  .exec-btn.selected-progress { background: rgba(240,180,41,0.15); border-color: #F0B429; }
+  .exec-btn.selected-notyet  { background: rgba(255,255,255,0.06); border-color: var(--steel-light); }
+  .exec-btn.dimmed { opacity: 0.3; }
+  .btn-icon { font-size: 26px; }
+  .btn-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+  .btn-complete .btn-label { color: var(--complete); }
+  .btn-progress .btn-label { color: var(--progress); }
+
+  .confirm-msg {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-top: 14px;
+    min-height: 18px;
+  }
+  .confirm-msg.visible { color: var(--gold); }
+
+  /* ══════════════════════════════════════════
+     EVENING PAGE
+  ══════════════════════════════════════════ */
+  .evening-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 24px 24px;
+  }
+
+  .question-screen { display: none; flex-direction: column; flex: 1; animation: fadeUp 0.35s ease both; }
+  .question-screen.active { display: flex; }
+
+  .q-number { font-size: 10px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+
+  .q-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+  }
+
+  .yn-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+
+  .yn-btn {
+    border: 1px solid var(--steel);
+    border-radius: 4px;
+    padding: 20px 8px;
+    background: var(--dark-2);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.12s;
+    -webkit-appearance: none;
+  }
+
+  .yn-btn:active { transform: scale(0.96); }
+  .yn-btn.selected-yes { background: rgba(76,175,80,0.12); border-color: #4CAF50; }
+  .yn-btn.selected-no  { background: rgba(255,80,80,0.08); border-color: rgba(255,80,80,0.4); }
+  .yn-icon { font-size: 28px; }
+  .yn-label { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; color: var(--text-dim); }
+  .yn-btn.selected-yes .yn-label { color: #4CAF50; }
+  .yn-btn.selected-no  .yn-label { color: rgba(255,80,80,0.8); }
+
+  .reflection-input {
+    flex: 1;
+    background: var(--dark-2);
+    border: 1px solid var(--steel);
+    border-radius: 4px;
+    padding: 16px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    min-height: 120px;
+    transition: border-color 0.15s;
+  }
+
+  .reflection-input:focus { border-color: rgba(201,150,26,0.5); }
+  .reflection-input::placeholder { color: var(--steel-light); }
+
+  .complete-screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .complete-screen.active { display: flex; }
+  .complete-icon { font-size: 56px; }
+  .complete-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; color: var(--gold); }
+  .complete-sub { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 280px; }
+
+  .tomorrow-preview {
+    margin-top: 8px;
+    padding: 14px 16px;
+    background: var(--dark-2);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    text-align: left;
+    width: 100%;
+  }
+  .tomorrow-label { font-size: 9px; letter-spacing: 2.5px; color: var(--gold); text-transform: uppercase; margin-bottom: 5px; }
+  .tomorrow-text { font-size: 14px; color: var(--text); line-height: 1.4; }
+
+  /* ══════════════════════════════════════════
+     DASHBOARD PAGE
+  ══════════════════════════════════════════ */
+  .dashboard-main { flex: 1; padding: 28px 24px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 80px; }
+
+  .streak-hero {
+    background: var(--dark-2);
+    border: 1px solid rgba(201,150,26,0.3);
+    border-radius: 4px;
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .streak-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  }
+
+  .streak-eyebrow { font-size: 10px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+  .streak-number { font-family: 'Bebas Neue', sans-serif; font-size: 72px; color: var(--gold-bright); line-height: 1; }
+  .streak-label { font-size: 11px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px; }
+  .best-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--text-dim); line-height: 1; }
+  .best-label { font-size: 9px; letter-spacing: 2px; color: var(--steel-light); text-transform: uppercase; margin-top: 4px; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-card { background: var(--dark-2); border: 1px solid var(--steel); border-radius: 4px; padding: 18px 16px; }
+  .stat-eyebrow { font-size: 9px; letter-spacing: 2.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--gold-bright); line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  .pacing-card {
+    background: var(--dark-2);
+    border: 1px solid var(--steel);
+    border-radius: 4px;
+    padding: 18px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .pacing-indicator { width: 8px; height: 48px; border-radius: 2px; flex-shrink: 0; }
+  .pacing-just-right { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); box-shadow: 0 0 10px rgba(240,180,41,0.4); }
+  .pacing-too-hot    { background: linear-gradient(180deg, #ff6b35, #cc4400); }
+  .pacing-too-cold   { background: linear-gradient(180deg, #4fa3ff, #1a5fa0); }
+  .pacing-state { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--gold-bright); line-height: 1; margin-bottom: 4px; }
+  .pacing-note { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ══════════════════════════════════════════
+     INTAKE PAGE
+  ══════════════════════════════════════════ */
+  .intake-main { flex: 1; display: flex; flex-direction: column; padding: 28px 24px 24px; overflow-y: auto; }
+
+  .step-screen { display: none; flex-direction: column; flex: 1; animation: fadeUp 0.35s ease both; }
+  .step-screen.active { display: flex; }
+
+  .screen-eyebrow { font-size: 10px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+  .screen-title { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 8px; }
+  .screen-sub { font-size: 13px; color: var(--text-dim); line-height: 1.5; margin-bottom: 24px; }
+
+  .goal-entries { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .goal-entry { display: flex; align-items: center; gap: 10px; }
+  .goal-num { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--steel-light); width: 20px; flex-shrink: 0; }
+
+  .goal-input {
+    flex: 1;
+    background: var(--dark-2);
+    border: 1px solid var(--steel);
+    border-radius: 3px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .goal-input:focus { border-color: rgba(201,150,26,0.5); }
+  .goal-input::placeholder { color: var(--steel-light); }
+
+  .q-label { font-size: 9px; letter-spacing: 2.5px; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; margin-top: 20px; }
+  .q-label:first-of-type { margin-top: 0; }
+  .q-hint { font-size: 11px; color: var(--text-dim); font-style: italic; margin-bottom: 10px; line-height: 1.4; }
+
+  .q-input {
+    width: 100%;
+    background: var(--dark-2);
+    border: 1px solid var(--steel);
+    border-radius: 3px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    min-height: 80px;
+    transition: border-color 0.15s;
+  }
+  .q-input:focus { border-color: rgba(201,150,26,0.5); }
+  .q-input::placeholder { color: var(--steel-light); }
+
+  .fear-flag {
+    display: none;
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: rgba(201,150,26,0.08);
+    border: 1px solid rgba(201,150,26,0.25);
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--gold-light);
+    line-height: 1.5;
+  }
+  .fear-flag.visible { display: block; }
+
+  .goal-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .goal-tab {
+    padding: 6px 12px;
+    background: var(--dark-2);
+    border: 1px solid var(--steel);
+    border-radius: 3px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .goal-tab.active { background: rgba(201,150,26,0.1); border-color: var(--gold); color: var(--gold); }
+
+  .mirror-zone { margin-bottom: 16px; border-radius: 4px; overflow: hidden; }
+  .zone-header { padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .zone-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .zone-strength .zone-header { background: rgba(76,175,80,0.15); border-left: 3px solid #4CAF50; }
+  .zone-develop  .zone-header { background: rgba(240,180,41,0.12); border-left: 3px solid #F0B429; }
+  .zone-gap      .zone-header { background: rgba(255,80,80,0.08);  border-left: 3px solid rgba(255,80,80,0.5); }
+  .zone-dot-strength { background: #4CAF50; }
+  .zone-dot-develop  { background: #F0B429; }
+  .zone-dot-gap      { background: rgba(255,80,80,0.7); }
+  .zone-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px; }
+  .zone-strength .zone-title { color: #4CAF50; }
+  .zone-develop  .zone-title { color: #F0B429; }
+  .zone-gap      .zone-title { color: rgba(255,80,80,0.8); }
+  .zone-items { padding: 10px 16px 14px; background: var(--dark-2); display: flex; flex-direction: column; gap: 6px; }
+  .zone-item { font-size: 13px; color: var(--text-dim); padding-left: 12px; border-left: 2px solid var(--steel); line-height: 1.4; }
+
+  /* ══════════════════════════════════════════
+     RESOURCES PAGE
+  ══════════════════════════════════════════ */
+  .resources-main { flex: 1; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-bottom: 80px; }
+
+  .pattern-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pattern-tag { padding: 4px 10px; border-radius: 2px; font-size: 10px; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; }
+  .pattern-initial { background: rgba(201,150,26,0.12); color: var(--gold-bright); border: 1px solid rgba(201,150,26,0.3); }
+  .pattern-distraction { background: rgba(255,152,0,0.15); color: #FFB74D; border: 1px solid rgba(255,152,0,0.3); }
+  .pattern-perfectionism { background: rgba(156,39,176,0.12); color: #CE93D8; border: 1px solid rgba(156,39,176,0.3); }
+  .pattern-fatigue { background: rgba(33,150,243,0.12); color: #90CAF9; border: 1px solid rgba(33,150,243,0.3); }
+  .pattern-inconsistency { background: rgba(244,67,54,0.1); color: #EF9A9A; border: 1px solid rgba(244,67,54,0.25); }
+  .pattern-procrastination { background: rgba(255,87,34,0.1); color: #FFAB91; border: 1px solid rgba(255,87,34,0.25); }
+  .pattern-time { background: rgba(0,188,212,0.1); color: #80DEEA; border: 1px solid rgba(0,188,212,0.25); }
+  .pattern-momentum { background: rgba(76,175,80,0.12); color: #A5D6A7; border: 1px solid rgba(76,175,80,0.3); }
+
+  .intro-text { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .intro-text strong { color: var(--text); }
+
+  .resource-card { background: var(--dark-2); border: 1px solid var(--steel); border-radius: 4px; overflow: hidden; }
+  .resource-top { padding: 16px 16px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .resource-type { font-size: 9px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; font-weight: 700; flex-shrink: 0; margin-top: 3px; }
+  .resource-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); line-height: 1.2; flex: 1; }
+  .resource-note { padding: 10px 16px; font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+  .resource-link {
+    display: block;
+    margin: 4px 16px 16px;
+    padding: 12px 16px;
+    background: rgba(201,150,26,0.08);
+    border: 1px solid rgba(201,150,26,0.2);
+    border-radius: 3px;
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  .rule-card {
+    padding: 14px 16px;
+    background: var(--dark-2);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .rule-card strong { color: var(--gold); }
+
+  /* ══════════════════════════════════════════
+     SHARED NAV BUTTONS
+  ══════════════════════════════════════════ */
+  .nav-buttons { display: flex; gap: 10px; margin-top: 20px; flex-shrink: 0; }
+
+  .btn-back {
+    padding: 14px 20px;
+    background: transparent;
+    border: 1px solid var(--steel);
+    border-radius: 4px;
+    color: var(--text-dim);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+
+  .btn-next {
+    flex: 1;
+    padding: 14px 20px;
+    background: var(--gold);
+    border: none;
+    border-radius: 4px;
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    -webkit-appearance: none;
+  }
+
+  .btn-next:disabled { opacity: 0.3; cursor: default; }
+  .btn-next:not(:disabled):active { opacity: 0.8; }
+
+  /* ══════════════════════════════════════════
+     BOTTOM NAV
+  ══════════════════════════════════════════ */
+  .bottom-nav {
+    border-top: 1px solid var(--steel);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    flex-shrink: 0;
+    background: var(--black);
+  }
+
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px 8px 14px; cursor: pointer; gap: 4px;
+    position: relative; opacity: 0.4;
+    transition: opacity 0.15s;
+  }
+
+  .nav-item.active { opacity: 1; }
+  .nav-item.active::before {
+    content: ''; position: absolute;
+    top: 0; left: 25%; right: 25%;
+    height: 2px; background: var(--gold);
+  }
+
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); font-weight: 600; }
+  .nav-item.active .nav-label { color: var(--gold); }
+
+  /* ══════════════════════════════════════════
+     ANIMATIONS
+  ══════════════════════════════════════════ */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="brand">
+    Steigerwald Performance
+    <span id="pageSubtitle">Power System</span>
+  </div>
+  <div class="header-right" id="headerRight">
+    <div class="header-num" id="headerNum">—</div>
+    <div class="header-label" id="headerLabel">Day Streak</div>
+  </div>
+</header>
+
+<div class="progress-bar" id="progressBar">
+  <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MORNING PAGE
+══════════════════════════════════════ -->
+<div class="page active" id="page-morning">
+  <div class="loading" id="morning-loading">
+    <div class="spinner"></div>
+    <div>Loading...</div>
+  </div>
+  <div class="morning-main" id="morning-content" style="display:none;">
+    <div>
+      <div class="goal-eyebrow">Today's Priority</div>
+      <div class="goal-title" id="goalTitle"></div>
+      <div class="action-block">
+        <div class="action-type">Target Action</div>
+        <div class="action-text" id="targetAction"></div>
+      </div>
+      <div class="action-block floor">
+        <div class="action-type">Minimum</div>
+        <div class="action-text" id="minAction"></div>
+      </div>
+      <div class="window-tag">⏱ Execution window &nbsp;<strong id="execWindow"></strong></div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="buttons-prompt">Where did you land?</div>
+      <div class="three-buttons">
+        <button class="exec-btn btn-complete" onclick="logStatus('Complete')">
+          <span class="btn-icon">✅</span>
+          <span class="btn-label">Complete</span>
+        </button>
+        <button class="exec-btn btn-progress" onclick="logStatus('In Progress')">
+          <span class="btn-icon">⚙️</span>
+          <span class="btn-label">In Progress</span>
+        </button>
+        <button class="exec-btn btn-notyet" onclick="logStatus('Not Yet')">
+          <span class="btn-icon">⏸</span>
+          <span class="btn-label">Not Yet</span>
+        </button>
+      </div>
+      <div class="confirm-msg" id="confirmMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     EVENING PAGE
+══════════════════════════════════════ -->
+<div class="page" id="page-evening">
+  <div class="evening-main">
+    <div class="question-screen active" id="q1">
+      <div class="q-number">Question 1 of 5</div>
+      <div class="q-text">Did you execute today's action?</div>
+      <div class="yn-buttons">
+        <button class="yn-btn" id="btnYes" onclick="selectYesNo('Yes')"><span class="yn-icon">✅</span><span class="yn-label">Yes</span></button>
+        <button class="yn-btn" id="btnNo"  onclick="selectYesNo('No')"><span class="yn-icon">⏸</span><span class="yn-label">No</span></button>
+      </div>
+      <div class="nav-buttons">
+        <button class="btn-next" id="nextQ1" onclick="goToQ(2)" disabled>Next</button>
+      </div>
+    </div>
+    <div class="question-screen" id="q2">
+      <div class="q-number">Question 2 of 5</div>
+      <div class="q-text">What resistance appeared today?</div>
+      <textarea class="reflection-input" id="input2" placeholder="Distraction, fear, fatigue, interruption..." oninput="checkQ(2)"></textarea>
+      <div class="nav-buttons">
+        <button class="btn-back" onclick="goToQ(1)">Back</button>
+        <button class="btn-next" id="nextQ2" onclick="goToQ(3)" disabled>Next</button>
+      </div>
+    </div>
+    <div class="question-screen" id="q3">
+      <div class="q-number">Question 3 of 5</div>
+      <div class="q-text">What will you do tomorrow?</div>
+      <textarea class="reflection-input" id="input3" placeholder="Be specific. One clear action..." oninput="checkQ(3)"></textarea>
+      <div class="nav-buttons">
+        <button class="btn-back" onclick="goToQ(2)">Back</button>
+        <button class="btn-next" id="nextQ3" onclick="goToQ(4)" disabled>Next</button>
+      </div>
+    </div>
+    <div class="question-screen" id="q4">
+      <div class="q-number">Question 4 of 5</div>
+      <div class="q-text">What obstacle might appear tomorrow?</div>
+      <textarea class="reflection-input" id="input4" placeholder="Think ahead. What usually gets in the way..." oninput="checkQ(4)"></textarea>
+      <div class="nav-buttons">
+        <button class="btn-back" onclick="goToQ(3)">Back</button>
+        <button class="btn-next" id="nextQ4" onclick="goToQ(5)" disabled>Next</button>
+      </div>
+    </div>
+    <div class="question-screen" id="q5">
+      <div class="q-number">Question 5 of 5</div>
+      <div class="q-text">How will you handle it?</div>
+      <textarea class="reflection-input" id="input5" placeholder="Your plan. Make it concrete..." oninput="checkQ(5)"></textarea>
+      <div class="nav-buttons">
+        <button class="btn-back" onclick="goToQ(4)">Back</button>
+        <button class="btn-next" id="nextQ5" onclick="submitReflection()" disabled>Done</button>
+      </div>
+    </div>
+    <div class="loading" id="evening-saving" style="display:none;">
+      <div class="spinner"></div><div>Saving...</div>
+    </div>
+    <div class="complete-screen" id="evening-complete">
+      <div class="complete-icon">🌙</div>
+      <div class="complete-title">Reflection Complete</div>
+      <div class="complete-sub">Tomorrow's action is set. Rest well. Show up again tomorrow.</div>
+      <div class="tomorrow-preview" id="tomorrowPreview" style="display:none;">
+        <div class="tomorrow-label">Tomorrow's Action</div>
+        <div class="tomorrow-text" id="tomorrowText"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DASHBOARD PAGE
+══════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="loading" id="dashboard-loading">
+    <div class="spinner"></div><div>Loading...</div>
+  </div>
+  <div class="dashboard-main" id="dashboard-content" style="display:none;">
+    <div class="streak-hero">
+      <div>
+        <div class="streak-eyebrow">Current Streak</div>
+        <div class="streak-number" id="currentStreak">0</div>
+        <div class="streak-label">Consecutive Days</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="best-num" id="longestStreak">0</div>
+        <div class="best-label">Best Ever</div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-eyebrow">Total Days</div>
+        <div class="stat-value" id="totalDays">0</div>
+        <div class="stat-sub">Executed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-eyebrow">This Week</div>
+        <div class="stat-value" id="weeklyRate">0%</div>
+        <div class="stat-sub">Completion Rate</div>
+      </div>
+    </div>
+    <div class="pacing-card">
+      <div class="pacing-indicator" id="pacingIndicator"></div>
+      <div>
+        <div class="pacing-state" id="pacingState">—</div>
+        <div class="pacing-note" id="pacingNote">Calculating...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     INTAKE PAGE
+══════════════════════════════════════ -->
+<div class="page" id="page-intake">
+  <div class="intake-main">
+
+    <div class="step-screen active" id="intake-step1">
+      <div class="screen-eyebrow">Step 1 of 4</div>
+      <div class="screen-title">What are you working toward?</div>
+      <div class="screen-sub">Enter up to 5 goals. Raw input is fine.</div>
+      <div class="goal-entries">
+        <div class="goal-entry"><div class="goal-num">1</div><input class="goal-input" id="goal1" type="text" placeholder="Your first goal..." oninput="checkGoals()"></div>
+        <div class="goal-entry"><div class="goal-num">2</div><input class="goal-input" id="goal2" type="text" placeholder="Optional..." oninput="checkGoals()"></div>
+        <div class="goal-entry"><div class="goal-num">3</div><input class="goal-input" id="goal3" type="text" placeholder="Optional..." oninput="checkGoals()"></div>
+        <div class="goal-entry"><div class="goal-num">4</div><input class="goal-input" id="goal4" type="text" placeholder="Optional..." oninput="checkGoals()"></div>
+        <div class="goal-entry"><div class="goal-num">5</div><input class="goal-input" id="goal5" type="text" placeholder="Optional..." oninput="checkGoals()"></div>
+      </div>
+      <div class="nav-buttons">
+        <button class="btn-next" id="nextIntake1" onclick="intakeGoTo(2)" disabled>Next</button>
+      </div>
+    </div>
+
+    <div class="step-screen" id="intake-step2">
+      <div class="screen-eyebrow">Step 2 of 4 — Prioritization</div>
+      <div class="screen-title" id="intake2Title"></div>
+      <div class="goal-tabs" id="intakeTabs2"></div>
+      <div class="q-label">Question 1</div>
+      <div class="q-text" style="font-size:17px;">Would achieving this have the greatest impact on your life right now?</div>
+      <textarea class="q-input" id="q_impact" placeholder="Why does this matter most right now..." oninput="checkIntake2()"></textarea>
+      <div class="q-label">Question 2</div>
+      <div class="q-text" style="font-size:17px;">Could this be your fastest win?</div>
+      <textarea class="q-input" id="q_fastest" placeholder="What makes this achievable quickly..." oninput="checkIntake2()"></textarea>
+      <div class="q-label">Question 3</div>
+      <div class="q-text" style="font-size:17px;">How will you know when you've achieved it?</div>
+      <textarea class="q-input" id="q_metric" placeholder="The specific, measurable endpoint..." oninput="checkIntake2()"></textarea>
+      <div class="q-label">Question 4 — Required</div>
+      <div class="q-text" style="font-size:17px;">How will you celebrate and share this win?</div>
+      <div class="q-hint">This question is non-negotiable. Hesitation here is diagnostic.</div>
+      <textarea class="q-input" id="q_celebrate" placeholder="Who will you tell? How will you share it publicly..." oninput="checkCelebration()"></textarea>
+      <div class="fear-flag" id="fearFlag">⚠️ Hesitation noted. The fear of putting your win out there is the brake. Name it and answer anyway.</div>
+      <div class="nav-buttons">
+        <button class="btn-back" onclick="intakeGoTo(1)">Back</button>
+        <button class="btn-next" id="nextIntake2" onclick="intakeSaveAndNext2()" disabled>Next Goal</button>
+      </div>
+    </div>
+
+    <div class="step-screen" id="intake-step3">
+      <div class="screen-eyebrow">Step 3 of 4 — Clarifiers</div>
+      <div class="screen-title" id="intake3Title"></div>
+      <div class="goal-tabs" id="intakeTabs3"></div>
+      <div class="q-label">Question 5</div>
+      <div class="q-text" style="font-size:17px;">What has stopped you before?</div>
+      <div class="q-hint">Be honest. This is your obstacle pre-mortem.</div>
+      <textarea class="q-input" id="q_obstacle" placeholder="Fear, time, resources, habits..." oninput="checkIntake3()"></textarea>
+      <div class="q-label">Question 6</div>
+      <div class="q-text" style="font-size:17px;">What is the minimum daily action you could take and still feel like you're moving?</div>
+      <textarea class="q-input" id="q_min_action" placeholder="The smallest possible step forward..." oninput="checkIntake3()"></textarea>
+      <div class="nav-buttons">
+        <button class="btn-back" onclick="intakeGoTo(2)">Back</button>
+        <button class="btn-next" id="nextIntake3" onclick="intakeSaveAndNext3()" disabled>Next Goal</button>
+      </div>
+    </div>
+
+    <div class="step-screen" id="intake-step4">
+      <div class="screen-eyebrow">Step 4 of 4 — Skill Mirror</div>
+      <div class="screen-title">Your Skill Mirror</div>
+      <div class="screen-sub">Based on your intake. You already have more than you think.</div>
+      <div id="skillMirrorContent"></div>
+      <div class="nav-buttons">
+        <button class="btn-next" onclick="finishIntake()">Start Executing</button>
+      </div>
+    </div>
+
+    <div class="loading" id="intake-saving" style="display:none;">
+      <div class="spinner"></div><div>Saving your goals...</div>
+    </div>
+
+    <div class="step-screen" id="intake-complete">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;">
+        <div style="font-size:56px;">🎯</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--gold);">Goals Set</div>
+        <div style="font-size:14px;color:var(--text-dim);line-height:1.6;max-width:280px;">Your priority goal is now loaded. Go execute.</div>
+        <button class="btn-next" style="max-width:240px;" onclick="navTo('morning')">Open Morning Screen</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     RESOURCES PAGE
+══════════════════════════════════════ -->
+<div class="page" id="page-resources">
+  <div class="loading" id="resources-loading">
+    <div class="spinner"></div><div>Analyzing your patterns...</div>
+  </div>
+  <div class="resources-main" id="resources-content" style="display:none;"></div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-morning" onclick="navTo('morning')">
+    <span class="nav-icon">☀️</span>
+    <span class="nav-label">Today</span>
+  </div>
+  <div class="nav-item" id="nav-intake" onclick="navTo('intake')">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Goals</span>
+  </div>
+  <div class="nav-item" id="nav-evening" onclick="navTo('evening')">
+    <span class="nav-icon">🌙</span>
+    <span class="nav-label">Reflect</span>
+  </div>
+  <div class="nav-item" id="nav-dashboard" onclick="navTo('dashboard')">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Stats</span>
+  </div>
+</nav>
+
+<script>
+  // ══════════════════════════════════════
+  // CONFIG — PASTE YOUR APPS SCRIPT URL HERE
+  // ══════════════════════════════════════
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSihaX7VBzKH0Z8drpAcurOkFwVvP3feke3R2Glk3_lZIG_ZfEYaXSEOr4OjEkjLA3hA/exec';
+
+  // ══════════════════════════════════════
+  // NAVIGATION
+  // ══════════════════════════════════════
+  let currentPage = 'morning';
+
+  function navTo(page) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    // Show selected page
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('nav-' + page).classList.add('active');
+    currentPage = page;
+
+    // Update header
+    const subtitles = { morning: 'Power System', evening: 'Evening Reflection', dashboard: 'Dashboard', intake: 'Goal Intake', resources: 'Resources' };
+    document.getElementById('pageSubtitle').textContent = subtitles[page] || 'Power System';
+
+    // Show/hide progress bar
+    const progressBar = document.getElementById('progressBar');
+    progressBar.className = (page === 'evening' || page === 'intake') ? 'progress-bar visible' : 'progress-bar';
+
+    // Load page data
+    if (page === 'morning') loadMorning();
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'resources') loadResources();
+    if (page === 'evening') resetEvening();
+
+    // Update URL hash for bookmarking
+    window.location.hash = page;
+  }
+
+  // Handle direct URL with hash
+  window.onload = function() {
+    const hash = window.location.hash.replace('#', '') || 'morning';
+    const validPages = ['morning', 'evening', 'dashboard', 'intake', 'resources'];
+    navTo(validPages.includes(hash) ? hash : 'morning');
+  };
+
+  // ══════════════════════════════════════
+  // API CALLS
+  // ══════════════════════════════════════
+  function callAPI(action, data) {
+    return fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...data })
+    });
+  }
+
+  function getAPI(params) {
+    const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+    return fetch(url).then(r => r.json());
+  }
+
+  // ══════════════════════════════════════
+  // MORNING PAGE
+  // ══════════════════════════════════════
+  let currentStatus = null;
+
+  function loadMorning() {
+    document.getElementById('morning-loading').style.display = 'flex';
+    document.getElementById('morning-content').style.display = 'none';
+
+    getAPI({ action: 'getToday' })
+      .then(data => {
+        document.getElementById('morning-loading').style.display = 'none';
+        if (data.error) { document.getElementById('morning-loading').innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:24px;text-align:center;">' + data.error + '</div>'; return; }
+
+        document.getElementById('goalTitle').textContent = data.goal.title;
+        document.getElementById('targetAction').textContent = data.action.target;
+        document.getElementById('minAction').textContent = data.action.minimum;
+        document.getElementById('execWindow').textContent = data.action.window;
+        document.getElementById('headerNum').textContent = data.streak;
+
+        if (data.action.status) {
+          currentStatus = data.action.status;
+          highlightButton(data.action.status);
+          showConfirm(data.action.status);
+        }
+
+        document.getElementById('morning-content').style.display = 'flex';
+      })
+      .catch(() => {
+        document.getElementById('morning-loading').innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:24px;text-align:center;">Could not connect. Check your network.</div>';
+      });
+  }
+
+  function logStatus(status) {
+    if (currentStatus === status) return;
+    currentStatus = status;
+    highlightButton(status);
+    document.querySelectorAll('.exec-btn').forEach(b => b.style.pointerEvents = 'none');
+
+    getAPI({ action: 'logExecution', status })
+      .then(() => {
+        showConfirm(status);
+        document.querySelectorAll('.exec-btn').forEach(b => b.style.pointerEvents = 'auto');
+      })
+      .catch(() => {
+        document.getElementById('confirmMsg').textContent = 'Save failed — try again.';
+        document.querySelectorAll('.exec-btn').forEach(b => b.style.pointerEvents = 'auto');
+      });
+  }
+
+  function highlightButton(status) {
+    const btns = document.querySelectorAll('.exec-btn');
+    btns.forEach(b => b.classList.remove('selected-complete', 'selected-progress', 'selected-notyet', 'dimmed'));
+    const map = { 'Complete': ['btn-complete','selected-complete'], 'In Progress': ['btn-progress','selected-progress'], 'Not Yet': ['btn-notyet','selected-notyet'] };
+    const [targetClass, selectedClass] = map[status];
+    btns.forEach(b => {
+      if (b.classList.contains(targetClass)) b.classList.add(selectedClass);
+      else b.classList.add('dimmed');
+    });
+  }
+
+  function showConfirm(status) {
+    const msgs = { 'Complete': 'Logged. Streak updated. Well done.', 'In Progress': 'Logged. Keep moving.', 'Not Yet': 'Logged. Reflect tonight — show up tomorrow.' };
+    const el = document.getElementById('confirmMsg');
+    el.textContent = msgs[status] || 'Logged.';
+    el.classList.add('visible');
+  }
+
+  // ══════════════════════════════════════
+  // EVENING PAGE
+  // ══════════════════════════════════════
+  let eveningExecuted = null;
+  let timerInterval = null;
+  let secondsLeft = 300;
+
+  function resetEvening() {
+    eveningExecuted = null;
+    secondsLeft = 300;
+    clearInterval(timerInterval);
+    document.querySelectorAll('.question-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('q1').classList.add('active');
+    document.getElementById('evening-complete').classList.remove('active');
+    document.getElementById('evening-saving').style.display = 'none';
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('headerNum').textContent = '5:00';
+    document.getElementById('headerLabel').textContent = 'Minutes';
+    ['2','3','4','5'].forEach(n => { document.getElementById('input' + n).value = ''; document.getElementById('nextQ' + n).disabled = true; });
+    document.getElementById('btnYes').className = 'yn-btn';
+    document.getElementById('btnNo').className = 'yn-btn';
+    document.getElementById('nextQ1').disabled = true;
+    startEveningTimer();
+  }
+
+  function startEveningTimer() {
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+      secondsLeft--;
+      updateTimerDisplay();
+      if (secondsLeft <= 0) clearInterval(timerInterval);
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const m = Math.floor(Math.max(0, secondsLeft) / 60);
+    const s = Math.max(0, secondsLeft) % 60;
+    if (currentPage === 'evening') {
+      document.getElementById('headerNum').textContent = m + ':' + String(s).padStart(2, '0');
+    }
+  }
+
+  function goToQ(q) {
+    document.querySelectorAll('.question-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('evening-complete').classList.remove('active');
+    const screen = document.getElementById('q' + q);
+    if (screen) screen.classList.add('active');
+    document.getElementById('progressFill').style.width = (((q - 1) / 5) * 100) + '%';
+  }
+
+  function selectYesNo(val) {
+    eveningExecuted = val;
+    document.getElementById('btnYes').className = 'yn-btn' + (val === 'Yes' ? ' selected-yes' : '');
+    document.getElementById('btnNo').className  = 'yn-btn' + (val === 'No'  ? ' selected-no'  : '');
+    document.getElementById('nextQ1').disabled = false;
+  }
+
+  function checkQ(q) {
+    document.getElementById('nextQ' + q).disabled = document.getElementById('input' + q).value.trim().length < 3;
+  }
+
+  function submitReflection() {
+    const data = {
+      executed: eveningExecuted,
+      resistance: document.getElementById('input2').value.trim(),
+      tomorrow_action: document.getElementById('input3').value.trim(),
+      tomorrow_obstacle: document.getElementById('input4').value.trim(),
+      obstacle_plan: document.getElementById('input5').value.trim()
+    };
+
+    document.querySelectorAll('.question-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('evening-saving').style.display = 'flex';
+    clearInterval(timerInterval);
+
+    getAPI({ action: 'saveReflection', ...data })
+      .then(() => {
+        document.getElementById('evening-saving').style.display = 'none';
+        document.getElementById('progressFill').style.width = '100%';
+        if (data.tomorrow_action) {
+          document.getElementById('tomorrowText').textContent = data.tomorrow_action;
+          document.getElementById('tomorrowPreview').style.display = 'block';
+        }
+        document.getElementById('evening-complete').classList.add('active');
+        document.getElementById('headerNum').textContent = '✓';
+      })
+      .catch(() => {
+        document.getElementById('evening-saving').style.display = 'none';
+        alert('Save failed. Try again.');
+        goToQ(5);
+      });
+  }
+
+  // ══════════════════════════════════════
+  // DASHBOARD PAGE
+  // ══════════════════════════════════════
+  function loadDashboard() {
+    document.getElementById('dashboard-loading').style.display = 'flex';
+    document.getElementById('dashboard-content').style.display = 'none';
+
+    getAPI({ action: 'getDashboard' })
+      .then(data => {
+        document.getElementById('dashboard-loading').style.display = 'none';
+        document.getElementById('currentStreak').textContent = data.currentStreak;
+        document.getElementById('longestStreak').textContent = data.longestStreak;
+        document.getElementById('totalDays').textContent = data.totalDays;
+        document.getElementById('weeklyRate').textContent = data.weeklyRate;
+        document.getElementById('pacingState').textContent = data.pacingState;
+        document.getElementById('pacingNote').textContent = data.pacingNote;
+        const indicator = document.getElementById('pacingIndicator');
+        indicator.className = 'pacing-indicator ' + (data.pacingState === 'Too Hot' ? 'pacing-too-hot' : data.pacingState === 'Too Cold' ? 'pacing-too-cold' : 'pacing-just-right');
+        document.getElementById('dashboard-content').style.display = 'flex';
+      })
+      .catch(() => {
+        document.getElementById('dashboard-loading').innerHTML = '<div style="color:var(--text-dim);font-size:13px;">Could not load stats.</div>';
+      });
+  }
+
+  // ══════════════════════════════════════
+  // INTAKE PAGE
+  // ══════════════════════════════════════
+  let intakeGoals = [];
+  let intakeCurrentIdx = 0;
+  let intakeAnswers = [];
+
+  function checkGoals() {
+    document.getElementById('nextIntake1').disabled = document.getElementById('goal1').value.trim().length < 3;
+  }
+
+  function getIntakeGoals() {
+    const result = [];
+    for (let i = 1; i <= 5; i++) {
+      const val = document.getElementById('goal' + i).value.trim();
+      if (val) result.push(val);
+    }
+    return result;
+  }
+
+  function buildIntakeTabs(containerId, goals, activeIdx, onClickFn) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    goals.forEach((goal, idx) => {
+      const tab = document.createElement('div');
+      tab.className = 'goal-tab' + (idx === activeIdx ? ' active' : '');
+      tab.textContent = 'Goal ' + (idx + 1);
+      tab.onclick = () => onClickFn(idx);
+      container.appendChild(tab);
+    });
+  }
+
+  function intakeGoTo(step) {
+    document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('intake-saving').style.display = 'none';
+    const el = document.getElementById('intake-step' + step);
+    if (el) el.classList.add('active');
+    document.getElementById('progressFill').style.width = (((step - 1) / 4) * 100) + '%';
+    if (step === 2) loadIntakeStep2(0);
+    if (step === 3) loadIntakeStep3(0);
+    if (step === 4) generateMirror();
+  }
+
+  function loadIntakeStep2(idx) {
+    intakeCurrentIdx = idx;
+    intakeGoals = getIntakeGoals();
+    buildIntakeTabs('intakeTabs2', intakeGoals, idx, (i) => { saveIntakeStep2(); loadIntakeStep2(i); });
+    document.getElementById('intake2Title').textContent = intakeGoals[idx];
+    const saved = intakeAnswers[idx] || {};
+    document.getElementById('q_impact').value    = saved.impact    || '';
+    document.getElementById('q_fastest').value   = saved.fastest   || '';
+    document.getElementById('q_metric').value    = saved.metric    || '';
+    document.getElementById('q_celebrate').value = saved.celebrate || '';
+    checkIntake2();
+    const isLast = idx === intakeGoals.length - 1;
+    document.getElementById('nextIntake2').textContent = isLast ? 'Next Step' : 'Next Goal';
+  }
+
+  function checkIntake2() {
+    const filled = ['q_impact','q_fastest','q_metric','q_celebrate'].every(id => document.getElementById(id).value.trim().length > 2);
+    document.getElementById('nextIntake2').disabled = !filled;
+  }
+
+  let celebTimer = null;
+  function checkCelebration() {
+    checkIntake2();
+    clearTimeout(celebTimer);
+    const val = document.getElementById('q_celebrate').value.trim();
+    if (val.length < 10) {
+      celebTimer = setTimeout(() => {
+        if (document.getElementById('q_celebrate').value.trim().length < 10) document.getElementById('fearFlag').classList.add('visible');
+      }, 4000);
+    } else {
+      document.getElementById('fearFlag').classList.remove('visible');
+    }
+  }
+
+  function saveIntakeStep2() {
+    if (!intakeAnswers[intakeCurrentIdx]) intakeAnswers[intakeCurrentIdx] = {};
+    intakeAnswers[intakeCurrentIdx].impact    = document.getElementById('q_impact').value.trim();
+    intakeAnswers[intakeCurrentIdx].fastest   = document.getElementById('q_fastest').value.trim();
+    intakeAnswers[intakeCurrentIdx].metric    = document.getElementById('q_metric').value.trim();
+    intakeAnswers[intakeCurrentIdx].celebrate = document.getElementById('q_celebrate').value.trim();
+  }
+
+  function intakeSaveAndNext2() {
+    saveIntakeStep2();
+    const isLast = intakeCurrentIdx === intakeGoals.length - 1;
+    if (isLast) intakeGoTo(3);
+    else loadIntakeStep2(intakeCurrentIdx + 1);
+  }
+
+  function loadIntakeStep3(idx) {
+    intakeCurrentIdx = idx;
+    intakeGoals = getIntakeGoals();
+    buildIntakeTabs('intakeTabs3', intakeGoals, idx, (i) => { saveIntakeStep3(); loadIntakeStep3(i); });
+    document.getElementById('intake3Title').textContent = intakeGoals[idx];
+    const saved = intakeAnswers[idx] || {};
+    document.getElementById('q_obstacle').value   = saved.obstacle   || '';
+    document.getElementById('q_min_action').value = saved.min_action || '';
+    checkIntake3();
+    const isLast = idx === intakeGoals.length - 1;
+    document.getElementById('nextIntake3').textContent = isLast ? 'Generate Skill Mirror' : 'Next Goal';
+  }
+
+  function checkIntake3() {
+    const filled = ['q_obstacle','q_min_action'].every(id => document.getElementById(id).value.trim().length > 2);
+    document.getElementById('nextIntake3').disabled = !filled;
+  }
+
+  function saveIntakeStep3() {
+    if (!intakeAnswers[intakeCurrentIdx]) intakeAnswers[intakeCurrentIdx] = {};
+    intakeAnswers[intakeCurrentIdx].obstacle   = document.getElementById('q_obstacle').value.trim();
+    intakeAnswers[intakeCurrentIdx].min_action = document.getElementById('q_min_action').value.trim();
+  }
+
+  function intakeSaveAndNext3() {
+    saveIntakeStep3();
+    const isLast = intakeCurrentIdx === intakeGoals.length - 1;
+    if (isLast) intakeGoTo(4);
+    else loadIntakeStep3(intakeCurrentIdx + 1);
+  }
+
+  function generateMirror() {
+    intakeGoals = getIntakeGoals();
+    const container = document.getElementById('skillMirrorContent');
+    container.innerHTML = '';
+    intakeGoals.forEach((goal, idx) => {
+      const a = intakeAnswers[idx] || {};
+      const allText = [goal, a.impact, a.metric, a.obstacle, a.min_action].join(' ').toLowerCase();
+      const strengths = [], development = [], gaps = [];
+      if (allText.includes('teach') || allText.includes('coach')) strengths.push('Teaching & instruction');
+      if (allText.includes('business') || allText.includes('client')) strengths.push('Business development mindset');
+      if (allText.includes('system') || allText.includes('build')) strengths.push('Systems thinking');
+      if (strengths.length === 0) { strengths.push('Domain expertise in your goal area'); strengths.push('Self-awareness — you identified this goal'); }
+      if (a.fastest) development.push('Execution speed — you see the path');
+      if (a.celebrate && a.celebrate.length > 10) development.push('Public accountability — building comfort with visibility');
+      if (development.length === 0) { development.push('Consistency — the system will build this'); development.push('Follow-through past early momentum'); }
+      if (a.obstacle) {
+        const obs = a.obstacle.toLowerCase();
+        if (obs.includes('time')) gaps.push('Time blocking and prioritization');
+        if (obs.includes('fear') || obs.includes('expos')) gaps.push('Visibility and public commitment');
+        if (obs.includes('focus') || obs.includes('distract')) gaps.push('Focus and distraction management');
+      }
+      if (gaps.length === 0) { gaps.push('Consistency systems'); gaps.push('Accountability structures'); }
+
+      if (intakeGoals.length > 1) {
+        const lbl = document.createElement('div');
+        lbl.style.cssText = 'font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;margin-top:8px;';
+        lbl.textContent = 'Goal ' + (idx + 1) + ' — ' + goal;
+        container.appendChild(lbl);
+      }
+      container.appendChild(buildZone('strength', 'Strength Zone', '60–70% already in you', strengths));
+      container.appendChild(buildZone('develop',  'Development Zone', 'Partially built', development));
+      container.appendChild(buildZone('gap',      'Gap Zone', 'Needs attention', gaps));
+    });
+  }
+
+  function buildZone(type, title, subtitle, items) {
+    const zone = document.createElement('div');
+    zone.className = 'mirror-zone zone-' + type;
+    const header = document.createElement('div');
+    header.className = 'zone-header';
+    header.innerHTML = `<div class="zone-dot zone-dot-${type}"></div><div><div class="zone-title">${title}</div><div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${subtitle}</div></div>`;
+    zone.appendChild(header);
+    const itemsEl = document.createElement('div');
+    itemsEl.className = 'zone-items';
+    items.forEach(item => { const el = document.createElement('div'); el.className = 'zone-item'; el.textContent = item; itemsEl.appendChild(el); });
+    zone.appendChild(itemsEl);
+    return zone;
+  }
+
+  function finishIntake() {
+    intakeGoals = getIntakeGoals();
+    const allData = intakeGoals.map((goal, idx) => ({ title: goal, rank: idx + 1, ...intakeAnswers[idx] }));
+    document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('intake-saving').style.display = 'flex';
+
+    getAPI({ action: 'saveIntake', goalsData: JSON.stringify(allData) })
+      .then(() => {
+        document.getElementById('intake-saving').style.display = 'none';
+        document.getElementById('intake-complete').classList.add('active');
+        document.getElementById('progressFill').style.width = '100%';
+      })
+      .catch(() => {
+        document.getElementById('intake-saving').style.display = 'none';
+        alert('Save failed. Try again.');
+        intakeGoTo(4);
+      });
+  }
+
+  // ══════════════════════════════════════
+  // RESOURCES PAGE
+  // ══════════════════════════════════════
+  const patternLabels = { distraction: 'Distraction', perfectionism: 'Perfectionism', fatigue: 'Fatigue', inconsistency: 'Inconsistency', procrastination: 'Procrastination', time: 'Time Pressure', momentum: 'Building Momentum', initial: 'Getting Started' };
+
+  function loadResources() {
+    document.getElementById('resources-loading').style.display = 'flex';
+    document.getElementById('resources-content').style.display = 'none';
+
+    getAPI({ action: 'getResources' })
+      .then(data => {
+        document.getElementById('resources-loading').style.display = 'none';
+        const main = document.getElementById('resources-content');
+        main.innerHTML = '';
+
+        if (data.patterns && data.patterns.length > 0) {
+          const patRow = document.createElement('div');
+          patRow.className = 'pattern-row';
+          data.patterns.forEach(p => {
+            const tag = document.createElement('span');
+            tag.className = 'pattern-tag pattern-' + p;
+            tag.textContent = patternLabels[p] || p;
+            patRow.appendChild(tag);
+          });
+          main.appendChild(patRow);
+          const intro = document.createElement('div');
+          intro.className = 'intro-text';
+          intro.innerHTML = `Your reflection patterns show <strong>${data.patterns.map(p => patternLabels[p] || p).join(' and ')}</strong>. These resources address that directly.`;
+          main.appendChild(intro);
+        }
+
+        if (data.resources && data.resources.length > 0) {
+          data.resources.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'resource-card';
+            card.innerHTML = `<div class="resource-top"><div class="resource-title">${r.title}</div><div class="resource-type">${r.type}</div></div><div class="resource-note">${r.note}</div><a class="resource-link" href="${r.url}" target="_blank">Find This Resource →</a>`;
+            main.appendChild(card);
+          });
+        }
+
+        const rule = document.createElement('div');
+        rule.className = 'rule-card';
+        rule.innerHTML = '<strong>Rule:</strong> Resources support execution. They never replace it.';
+        main.appendChild(rule);
+
+        main.style.display = 'flex';
+      })
+      .catch(() => {
+        document.getElementById('resources-loading').innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:24px;text-align:center;">Complete a few evening reflections first.</div>';
+      });
+  }
+</script>
+</body>
+</html>
