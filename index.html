@@ -959,10 +959,12 @@
     });
   }
 
-  function getAPI(params) {
-    const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-    return fetch(url).then(r => r.json());
-  }
+function getAPI(params) {
+  const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  return fetch(url, {
+    redirect: 'follow'
+  }).then(r => r.json());
+}
 
   // ══════════════════════════════════════
   // MORNING PAGE
